@@ -4,10 +4,10 @@ import {CredentialType, UserCredentials} from '../hooks/UserCredentials';
 import httpClient from './HttpClient';
 
 export class IdentityService {
-  useUserCredentials = new UserCredentials();
+  private useUserCredentials = new UserCredentials();
   async refreshToken(): Promise<any> {
     try {
-      let response = await httpClient.post('/identity/Account/refreshtoken', {
+      let response = await httpClient.post('/Account/RefreshToken', {
         jwt: this.useUserCredentials.get(CredentialType.Token),
         refreshToken: this.useUserCredentials.get(CredentialType.RefreshToken),
       });
@@ -37,6 +37,7 @@ export class IdentityService {
     firstName: string,
     lastName: string,
   ): Promise<any> {
+    console.log('Starting register');
     try {
       let loginInfo = {
         email,
@@ -45,12 +46,19 @@ export class IdentityService {
         lastName,
       };
 
+      console.log('Resister info: ' + loginInfo.email, loginInfo.password, loginInfo.firstName, loginInfo.lastName);
+
       let response = await httpClient.post(
-        '/identity/Account/Register',
+        '/Account/Register',
         loginInfo,
       );
 
+      console.log('Status: ' + response.status);
+
       let resData = response.data as IJwtResponse;
+
+      console.log('Data: ' + resData);
+
       this.useUserCredentials.set(CredentialType.Token, resData.token);
       this.useUserCredentials.set(CredentialType.RefreshToken, resData.refreshToken);
 
@@ -59,7 +67,9 @@ export class IdentityService {
         data: resData,
       };
     } catch (e) {
+      console.log('error: ' + e);
       let restApiError = (e as AxiosError).response?.data;
+      console.log('error: ' + restApiError);
       let response = {
         status: (e as AxiosError).response!.status,
         restApiError,
@@ -76,7 +86,7 @@ export class IdentityService {
 
     try {
       let response = await httpClient.post(
-        '/identity/Account/LogIn',
+        '/Account/Login',
         loginInfo,
       );
       let resData = response.data as IJwtResponse;

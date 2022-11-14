@@ -3,17 +3,15 @@ import React, { useState } from 'react';
 import { useStyles } from '../../styles/mainStyles';
 import { IdentityService } from '../../services/IdentityService';
 
-const RegisterView = () => {
+const LoginView = () => {
   const mainStyles = useStyles();
   const is = new IdentityService();
 
   const [email, setEmail] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
 
   const register = async () => {
-    await is.register(email, password, firstName, lastName);
+    await is.login(email, password);
   };
 
   return (
@@ -24,24 +22,16 @@ const RegisterView = () => {
           <TextInput style={[styles.input, mainStyles.inputBlock]} value={email} keyboardType={"email-address"} autoComplete={"email"} onChangeText={text => setEmail(text)}  placeholder="Email" />
       </View>
       <View style={styles.viewRow}>
-          <Text style={mainStyles.textBlock}>First name</Text>
-          <TextInput style={[styles.input, mainStyles.inputBlock]} value={firstName} onChangeText={text => setFirstName(text)} placeholder="First Name" />
-      </View>
-      <View style={styles.viewRow}>
-          <Text style={mainStyles.textBlock}>Last name</Text>
-          <TextInput style={[styles.input, mainStyles.inputBlock]} value={lastName} onChangeText={text => setLastName(text)}  placeholder="Last Name" />
-      </View>
-      <View style={styles.viewRow}>
           <Text style={mainStyles.textBlock}>Password</Text>
           <TextInput style={[styles.input, mainStyles.inputBlock]} value={password} onChangeText={text => setPassword(text)}  secureTextEntry={true} placeholder="Password" />
       </View>
-      <Pressable onPress={() => {register()}} style={[mainStyles.button]}><Text style={[mainStyles.titleBlock]}>Register</Text></Pressable>
+      <Pressable onPress={() => {register()}} style={[mainStyles.button]}><Text style={[mainStyles.titleBlock]}>Login</Text></Pressable>
     </View>
 
   );
 };
 
-export default RegisterView;
+export default LoginView;
 
 const styles = StyleSheet.create({
   viewMain: {
