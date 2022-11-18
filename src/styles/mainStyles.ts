@@ -43,6 +43,10 @@ export const useStyles = () => {
       paddingRight: 10,
       paddingTop: 5,
       paddingBottom: 5,
+    },
+    buttonSecond : {
+      backgroundColor: theme.background.button,
+      marginBottom: 10
     }
 
   })

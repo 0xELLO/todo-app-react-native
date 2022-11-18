@@ -10,10 +10,11 @@ export class BaseService<TEntity> {
   async getAll(action: string): Promise<TEntity[] | null> {
     try {
       console.log(`Get All at ${action}`);
-      let jwt = this.useUserCredentials.get(CredentialType.Token);
-      let response = await httpClient.get(this.path + '/' + action, {
+      let jwt = await this.useUserCredentials.get(CredentialType.Token);
+      console.log(jwt)
+      let response = await httpClient.get(this.path, {
         headers: {
-          Authorization: 'bearer ' + jwt,
+          Authorization: 'Bearer ' + jwt,
         }
       });
       console.log(response.data);
@@ -32,7 +33,7 @@ export class BaseService<TEntity> {
       console.log(jwt);
       let response = await httpClient.post(this.path + '/' + action, entity, {
         headers: {
-          Authorization: 'bearer ' + jwt,
+          Authorization: 'Bearer ' + jwt,
         }
       });
       return response.data as TEntity;
@@ -49,7 +50,7 @@ export class BaseService<TEntity> {
       let jwt = this.useUserCredentials.get(CredentialType.Token);;
       let response = await httpClient.get(this.path + '/' + action + '/' + id, {
         headers: {
-          Authorization: 'bearer ' + jwt,
+          Authorization: 'Bearer ' + jwt,
         },
       });
       console.log(response.data);;
@@ -67,7 +68,7 @@ export class BaseService<TEntity> {
       let jwt = this.useUserCredentials.get(CredentialType.Token);;
       let response = await httpClient.get(this.path + '/' + action + '/' + id, {
         headers: {
-          Authorization: 'bearer ' + jwt,
+          Authorization: 'Bearer ' + jwt,
         },
       });
       console.log(response.data);

@@ -1,11 +1,15 @@
 import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useStyles } from '../../styles/mainStyles';
 import { IdentityService } from '../../services/IdentityService';
+import { AuthStateUpdateContext } from '../../../App';
+
 
 const RegisterView = () => {
   const mainStyles = useStyles();
   const is = new IdentityService();
+
+  const authStateUpdateContext = useContext(AuthStateUpdateContext);
 
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -13,7 +17,12 @@ const RegisterView = () => {
   const [password, setPassword] = useState('');
 
   const register = async () => {
-    await is.register(email, password, firstName, lastName);
+    const res = await is.register(email, password, firstName, lastName);
+    if (res === false) {
+      authStateUpdateContext(false);
+    } else {
+      authStateUpdateContext(true);
+    }
   };
 
   return (

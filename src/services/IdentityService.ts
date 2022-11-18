@@ -5,7 +5,7 @@ import httpClient from './HttpClient';
 
 export class IdentityService {
   private useUserCredentials = new UserCredentials();
-  async refreshToken(): Promise<any> {
+  async refreshToken(): Promise<boolean> {
     try {
       let response = await httpClient.post('/Account/RefreshToken', {
         jwt: this.useUserCredentials.get(CredentialType.Token),
@@ -17,17 +17,12 @@ export class IdentityService {
       this.useUserCredentials.set(CredentialType.Token, resData.token);
       this.useUserCredentials.set(CredentialType.RefreshToken, resData.refreshToken);
 
-      return {
-        status: response.status,
-        data: response.data,
-      };
+      return true;
     } catch (e) {
+      console.log('error: ' + e);
       let restApiError = (e as AxiosError).response?.data;
-      let response = {
-        status: (e as AxiosError).response!.status,
-        restApiError,
-      };
-      return response;
+      console.log('error: ' + restApiError);
+      return false;
     }
   }
 
@@ -36,7 +31,7 @@ export class IdentityService {
     password: string,
     firstName: string,
     lastName: string,
-  ): Promise<any> {
+  ): Promise<boolean> {
     console.log('Starting register');
     try {
       let loginInfo = {
@@ -62,23 +57,16 @@ export class IdentityService {
       this.useUserCredentials.set(CredentialType.Token, resData.token);
       this.useUserCredentials.set(CredentialType.RefreshToken, resData.refreshToken);
 
-      return {
-        status: response.status,
-        data: resData,
-      };
+      return true;
     } catch (e) {
       console.log('error: ' + e);
       let restApiError = (e as AxiosError).response?.data;
       console.log('error: ' + restApiError);
-      let response = {
-        status: (e as AxiosError).response!.status,
-        restApiError,
-      };
-      return response;
+      return false;
     }
   }
 
-  async login(email: string, password: string): Promise<any> {
+  async login(email: string, password: string): Promise<boolean> {
     let loginInfo = {
       email,
       password,
@@ -94,17 +82,12 @@ export class IdentityService {
       this.useUserCredentials.set(CredentialType.Token, resData.token);
       this.useUserCredentials.set(CredentialType.RefreshToken, resData.refreshToken);
 
-      return {
-        status: response.status,
-        data: resData,
-      };
+      return true;
     } catch (e) {
+      console.log('error: ' + e);
       let restApiError = (e as AxiosError).response?.data;
-      let response = {
-        status: (e as AxiosError).response!.status,
-        restApiError,
-      };
-      return response;
+      console.log('error: ' + restApiError);
+      return false;
     }
   }
 }

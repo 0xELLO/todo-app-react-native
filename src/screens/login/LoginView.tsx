@@ -1,17 +1,25 @@
 import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useStyles } from '../../styles/mainStyles';
 import { IdentityService } from '../../services/IdentityService';
+import { AuthStateUpdateContext } from '../../../App';
 
 const LoginView = () => {
   const mainStyles = useStyles();
   const is = new IdentityService();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const authStateUpdateContext = useContext(AuthStateUpdateContext);
 
-  const register = async () => {
-    await is.login(email, password);
+  const [email, setEmail] = useState('test1@test1.com');
+  const [password, setPassword] = useState('Password.123');
+
+  const login = async () => {
+    const res = await is.login(email, password);
+    if (res === false) {
+      authStateUpdateContext(false);
+    } else {
+      authStateUpdateContext(true);
+    }
   };
 
   return (
@@ -25,7 +33,7 @@ const LoginView = () => {
           <Text style={mainStyles.textBlock}>Password</Text>
           <TextInput style={[styles.input, mainStyles.inputBlock]} value={password} onChangeText={text => setPassword(text)}  secureTextEntry={true} placeholder="Password" />
       </View>
-      <Pressable onPress={() => {register()}} style={[mainStyles.button]}><Text style={[mainStyles.titleBlock]}>Login</Text></Pressable>
+      <Pressable onPress={() => {login()}} style={[mainStyles.button]}><Text style={[mainStyles.titleBlock]}>Login</Text></Pressable>
     </View>
 
   );
