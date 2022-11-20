@@ -14,7 +14,9 @@ const LoginView = () => {
   const [password, setPassword] = useState('Password.123');
 
   const login = async () => {
+    console.log('Here')
     const res = await is.login(email, password);
+
     if (res === false) {
       authStateUpdateContext(false);
     } else {

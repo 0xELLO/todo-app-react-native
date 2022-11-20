@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import React, { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import {StyleSheet, Text, View} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList} from '@react-navigation/drawer';
 
 import MainView from './src/screens/MainView';
@@ -14,25 +14,39 @@ import { paths } from './src/types/Paths';
 import { ITodoCategories } from './src/domain/ITodoCategories';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useStyles } from './src/styles/mainStyles';
+import { IdentityService } from './src/services/IdentityService';
+import CategoriesView from './src/screens/categories/CategoriesView';
+import { set } from 'react-native-reanimated';
 
 const Drawer = createDrawerNavigator();
 export const LoginStateContext = React.createContext(false);
 export const AuthStateUpdateContext = React.createContext((value: boolean) => {});
 
+export const CategoriesContext = React.createContext([] as ITodoCategories[]);
+export const CategoriesUpdateContext = React.createContext((value: ITodoCategories[]) => {});
+export const CategoriesCallbackContext = React.createContext(() => {});
+export const CategoriesDeleteContext = React.createContext((id: string) => {});
+export const CategoriesChangeContext = React.createContext(() => {});
+
 const App = () => {
   const navTheme = useNavigationTheme();
 
-  const getInitialAuthState = () : boolean => {
-    const userCredentials = new UserCredentials();
-    let value = false;
-    userCredentials.get(CredentialType.Token).then((e) => {
-      if (e === null) {value = false;}
-      value = true;
-    })
-    return value;
-  };
+  const [authState, setAuthState] = useState(false);
 
-  const [authState, setAuthState] = useState(getInitialAuthState());
+  useEffect(() => {
+    const getInitialAuthState = async () => {
+      const userCredentials = new UserCredentials();
+      const res = await userCredentials.get(CredentialType.Token);
+      if (res == null) {
+        setAuthState(false);
+      } else {
+        const identityService = new IdentityService();
+        const ress = await identityService.refreshToken();
+        setAuthState(ress);
+      }
+    }
+    getInitialAuthState();
+  }, []);
 
   return (
     <LoginStateContext.Provider value={authState}>
@@ -61,35 +75,70 @@ const CategoriesNavView = ()  => {
   const mainStyles = useStyles();
 
   const getCategories = useCallback(async () => {
-    const categoriesService = new BaseService(paths.todoCategories);
-    const data = await categoriesService.getAll('');
+    const categoriesService = new BaseService<ITodoCategories>(paths.todoCategories);
+    const data = await categoriesService.getAll('Categories');
+    data!.sort((a, b) => (a.categorySort < b.categorySort) ? -1 : 1);
     setCategories(data as ITodoCategories[]);
   }, []);
 
+  const deleteCategory = async (id: string) => {
+    setCategories(curr => {return curr.filter(category => category.id !== id)})
+    updatePostion(categories)
+    const categoriesService = new BaseService<ITodoCategories>(paths.todoCategories);
+    await categoriesService.delete('Categories', id);
+    await getCategories();
+  }
+
+  const updatePostion = async (data: ITodoCategories[]) => {
+    const categoriesService = new BaseService<ITodoCategories>(paths.todoCategories);
+    let index = 1;
+    for (const cat of data) {
+      cat.categorySort = index;
+      await categoriesService.change('Categories' ,cat, cat.id as string);
+      index++;
+    }
+    await getCategories();
+  }
+
   useEffect(() => {
     getCategories().catch();
-    console.log("Hello from categories")
   }, [getCategories]);
 
   return (
     <>
-      <Drawer.Navigator  initialRouteName="Home" drawerContent={props => {
-          return (
-            <SafeAreaView style={{flex: 1, justifyContent: 'space-between'}}>
-              <DrawerContentScrollView {...props}>
-                  <DrawerItem style={[mainStyles.buttonSecond]} label={"Logout"} onPress={() => {authStateUpdateContext(false)}}/>
-                  <DrawerItemList {...props} />
-              </DrawerContentScrollView>
-              <View>
-                  <DrawerItem  label={"Add New"} onPress={() => {getCategories()}}/>
-              </View>
-            </SafeAreaView>
-          )
-        }}>
-          <Drawer.Screen  name="Cat1" component={MainView} />
-          <Drawer.Screen  name="Cat2" component={MainView} />
-          <Drawer.Screen  name="Cat3" component={MainView} />
-      </Drawer.Navigator>
+      <CategoriesContext.Provider value={categories}>
+      <CategoriesCallbackContext.Provider value={getCategories}>
+      <CategoriesUpdateContext.Provider value={setCategories}>
+      <CategoriesChangeContext.Provider value={updatePostion}>
+      <CategoriesDeleteContext.Provider value={deleteCategory}>
+
+        <Drawer.Navigator  initialRouteName="Home" drawerContent={props => {
+            return (
+              <SafeAreaView style={{flex: 1, justifyContent: 'space-between'}}>
+                <DrawerContentScrollView {...props}>
+                    <DrawerItemList {...props} />
+                </DrawerContentScrollView>
+                <View>
+                    <DrawerItem style={[mainStyles.buttonSecond]} label={"Logout"} onPress={() => {authStateUpdateContext(false)}}/>
+                </View>
+              </SafeAreaView>
+            )
+          }}>
+            <>
+            <Drawer.Screen  name="All Categories"  component={CategoriesView} />
+              <>
+              {categories.map((cat) => {
+                  return <Drawer.Screen key={cat.id} name={cat.categoryName} component={MainView} />
+              })}
+              </>
+            </>
+        </Drawer.Navigator>
+
+      </CategoriesDeleteContext.Provider >
+      </CategoriesChangeContext.Provider >
+      </CategoriesUpdateContext.Provider >
+      </CategoriesCallbackContext.Provider >
+      </CategoriesContext.Provider>
     </>
   )
 }

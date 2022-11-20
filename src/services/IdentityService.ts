@@ -7,15 +7,18 @@ export class IdentityService {
   private useUserCredentials = new UserCredentials();
   async refreshToken(): Promise<boolean> {
     try {
-      let response = await httpClient.post('/Account/RefreshToken', {
-        jwt: this.useUserCredentials.get(CredentialType.Token),
-        refreshToken: this.useUserCredentials.get(CredentialType.RefreshToken),
-      });
+      let refreshToken = {
+        jwt: await this.useUserCredentials.get(CredentialType.Token),
+        refreshToken: await this.useUserCredentials.get(CredentialType.RefreshToken)
+      };
+      console.log(refreshToken.jwt)
+      console.log(refreshToken.refreshToken)
+      let response = await httpClient.post('/Account/RefreshToken', refreshToken);
 
       let resData = response.data as IJwtResponse;
 
-      this.useUserCredentials.set(CredentialType.Token, resData.token);
-      this.useUserCredentials.set(CredentialType.RefreshToken, resData.refreshToken);
+      await this.useUserCredentials.set(CredentialType.Token, resData.token);
+      await this.useUserCredentials.set(CredentialType.RefreshToken, resData.refreshToken);
 
       return true;
     } catch (e) {
@@ -54,8 +57,8 @@ export class IdentityService {
 
       console.log('Data: ' + resData);
 
-      this.useUserCredentials.set(CredentialType.Token, resData.token);
-      this.useUserCredentials.set(CredentialType.RefreshToken, resData.refreshToken);
+      await this.useUserCredentials.set(CredentialType.Token, resData.token);
+      await this.useUserCredentials.set(CredentialType.RefreshToken, resData.refreshToken);
 
       return true;
     } catch (e) {
@@ -67,21 +70,14 @@ export class IdentityService {
   }
 
   async login(email: string, password: string): Promise<boolean> {
-    let loginInfo = {
-      email,
-      password,
-    };
-
     try {
-      let response = await httpClient.post(
-        '/Account/Login',
-        loginInfo,
-      );
+      let loginInfo = {email, password};
+      let response = await httpClient.post('/Account/Login', loginInfo);
       let resData = response.data as IJwtResponse;
 
       this.useUserCredentials.set(CredentialType.Token, resData.token);
       this.useUserCredentials.set(CredentialType.RefreshToken, resData.refreshToken);
-
+      console.log(await this.useUserCredentials.get(CredentialType.Token))
       return true;
     } catch (e) {
       console.log('error: ' + e);
