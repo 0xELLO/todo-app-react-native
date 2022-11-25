@@ -1,7 +1,7 @@
 export interface ITodoPriorities {
   id?: string;
-  appUserId: string;
+  appUserId?: string;
   priorityName: string;
   prioritySort: number;
-  syncDt: string;
+  syncDt?: string;
 }

@@ -11,7 +11,6 @@ export class BaseService<TEntity> {
     try {
       console.log(`Get All at ${action}`);
       let jwt = await this.useUserCredentials.get(CredentialType.Token);
-      console.log(jwt)
       let response = await httpClient.get(this.path, {
         headers: {
           Authorization: 'Bearer ' + jwt,
@@ -33,7 +32,7 @@ export class BaseService<TEntity> {
     try {
       console.log(`Add at ${action}`);
       const jwt = await this.useUserCredentials.get(CredentialType.Token);
-      console.log(jwt);
+      console.log(JSON.stringify(entity))
       let response = await httpClient.post(this.path, entity, {
         headers: {
           Authorization: 'Bearer ' + jwt,
@@ -113,7 +112,7 @@ export class BaseService<TEntity> {
     }
   }
 
-  async delete(action: string, id: string) {
+  async delete(action: string, id: string) : Promise<TEntity | null> {
     try {
       console.log(`Delete at ${action}`);
       const jwt = await this.useUserCredentials.get(CredentialType.Token);;

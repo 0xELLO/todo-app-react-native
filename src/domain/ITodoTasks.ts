@@ -8,5 +8,5 @@ export interface ITodoTasks {
   isArchived: boolean;
   todoCategoryId: string;
   todoPriorityId: string;
-  syncDt: string;
+  syncDt?: string;
 }

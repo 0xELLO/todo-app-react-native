@@ -1,77 +1,103 @@
-import { View, Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useStyles } from '../../styles/mainStyles';
-import { BaseService } from '../../services/BaseService';
-import { paths } from '../../types/Paths';
-import { ITodoCategories } from '../../domain/ITodoCategories';
+import { StackScreenProps } from '@react-navigation/stack';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { StackParamList } from '../../../App';
 import AddButton from '../../components/AddButton';
-import DraggableFlatList, {
-  ScaleDecorator,
-  RenderItemParams,
-} from "react-native-draggable-flatlist";
-import { CategoriesCallbackContext, CategoriesChangeContext, CategoriesContext, CategoriesDeleteContext, CategoriesUpdateContext } from '../../../App';
+import ItemsList from '../../components/ItemsList';
+import { ITodoCategories } from '../../domain/ITodoCategories';
+import { ITodoTasks } from '../../domain/ITodoTasks';
+import { BaseService } from '../../services/BaseService';
+import { useStyles } from '../../styles/mainStyles';
+import { Nameable } from '../../types/Nameable';
+import { paths } from '../../types/Paths';
 
-// params: {categories: ITodoCategories[], setCategories: React.Dispatch<React.SetStateAction<ITodoCategories[]>>, updateCategories: () => {}}
-const CategoriesView = () => {
-  const categories = useContext(CategoriesContext);
-  const setCategories = useContext(CategoriesUpdateContext);
-  const updateCategories = useContext(CategoriesCallbackContext);
-  const changePosition = useContext(CategoriesChangeContext);
-  const deleteCategory = useContext(CategoriesDeleteContext);
+class CategoriesExtended implements ITodoCategories, Nameable {
+  id: string;
+  categoryName: string;
+  categorySort: number;
+  syncDt?: string | undefined;
+  constructor(id: string, categoryName: string, categorySort: number, syncDt: string) {
+    this.id = id;
+    this.categoryName = categoryName;
+    this.categorySort = categorySort;
+    this.syncDt = syncDt;
+  }
+  getName(){return this.categoryName};
+  setName(name: string){(this.categoryName = name)};
+  getPosition(){return this.categorySort};
+  getId(){return this.id};
 
+}
+type Props = StackScreenProps<StackParamList, 'Categories'>;
+const CategoriesView = ({ navigation } : Props ) => {
   const mainStyles = useStyles();
-  const renderItem = ({ item, drag, isActive }: RenderItemParams<ITodoCategories>) => {
-    return (
-      <ScaleDecorator>
-        <TouchableOpacity
-          activeOpacity={1}
-          onLongPress={drag}
-          onPress={() => console.log('PRESS')}
-          disabled={isActive}>
-            <View style={mainStyles.block}>
-              <Text style={styles.btn}><Text style={mainStyles.titleBlock} >{item.categoryName}</Text></Text>
-              <Pressable style={{width: 20}} onPress={() => deleteCategory(item.id!)}><Text style={mainStyles.titleBlock}>X</Text></Pressable>
-            </View>
-        </TouchableOpacity>
-      </ScaleDecorator>
-    );
-  };
+  const [categories, setCategories] = useState([] as CategoriesExtended[])
+  const categoriesService =  useMemo(() => new BaseService<ITodoCategories>(paths.todoCategories), []);
+
+  const morfData = (data: ITodoCategories[]) : CategoriesExtended[] => {
+    return data.flatMap(cat => new CategoriesExtended(cat.id as string, cat.categoryName, cat.categorySort, cat.syncDt as string))
+  }
+
+  const reloadCategories = useCallback(async () => {
+    const data = await categoriesService.getAll('Categories');
+    data!.sort((a, b) => (a.categorySort < b.categorySort) ? -1 : 1);
+    setCategories(morfData(data as ITodoCategories[]));
+  }, [categoriesService]);
+
+  useEffect(() => {
+    reloadCategories().catch();
+  }, [reloadCategories]);
+
+  const changePosition = async (data: ITodoCategories[]) => {
+    let index = 1;
+    for (const cat of data) {
+      cat.categorySort = index;
+      await updateCategory(cat);
+      index++;
+    }
+    await reloadCategories();
+  }
+
+  const updateCategory = async (data: ITodoCategories) => {
+    await categoriesService.change('Categories', data, data.id as string);
+  }
+
+  const deleteCategory = async (id: string) => {
+    setCategories(curr => {return curr.filter(category => category.id !== id)})
+    changePosition(categories)
+    const tasksService = new BaseService<ITodoTasks>(paths.todoTasks);
+    const tasks = await tasksService.getAll('Tasks');
+    for(let task of tasks!) {
+      if (task.todoCategoryId === id) {
+        await tasksService.delete('Tasks', id);
+      }
+    }
+
+    await categoriesService.delete('Categories', id);
+    await reloadCategories();
+  }
+
+  const openPriorities = (id: string) => {
+    navigation.push('Priorities', {categoryId: id})
+  }
 
   const addNewCategory = async (name: string) => {
       const newCat = {
         categoryName: name,
         categorySort: categories.length + 1,
       };
-      const categoriesService = new BaseService<ITodoCategories>(paths.todoCategories);
       await categoriesService.add('Categories', newCat);
-      await updateCategories();
+      await reloadCategories();
   }
 
   return (
     <>
       <View style={mainStyles.containerSecond}>
-        <DraggableFlatList
-          data={categories}
-          onDragEnd={({ data }) => { setCategories(data); changePosition(data);}}
-          keyExtractor={(item) => item.id!.toString()}
-          renderItem={renderItem}
-        />
+        <ItemsList<CategoriesExtended> data={categories} setData={setCategories} updateData={updateCategory} reloadData={reloadCategories} deleteData={deleteCategory} changePosition={changePosition} openChild={openPriorities} /> 
       </View>
       <AddButton addNew={addNewCategory} />
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  block: {
-    flex: 1,
-    width: '100%',
-    flexDirection: 'row',
-  },
-  btn: {
-    flex: 1,
-    flexGrow: 1,
-  }
-})
 
 export default CategoriesView;

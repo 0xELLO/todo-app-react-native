@@ -6,10 +6,10 @@ import { useBackHandler } from '@react-native-community/hooks';
 
 const AddButton = (props: {addNew: (value: string) => {}}) => {
   const mainStyles = useStyles();
-  const [renderInput, setRenderInput] = useState(false);
+  const [openInput, setOpenInput] = useState(false);
 
   const backActionHandler = () => {
-    setRenderInput(false);
+    setOpenInput(false);
     return true;
   }
 
@@ -17,8 +17,8 @@ const AddButton = (props: {addNew: (value: string) => {}}) => {
 
   return (
     <View style={styles.main}>
-      {renderInput ? <InputAdd setRenderInput={setRenderInput}  addNew={props.addNew} /> : 
-      <Pressable style={mainStyles.plusButton} onPress={() => setRenderInput(true)} ><Text style={{fontSize: 30}} >+</Text></Pressable>}
+      {openInput ? <InputAdd setRenderInput={setOpenInput}  addNew={props.addNew} /> : 
+      <Pressable style={mainStyles.plusButton} onPress={() => setOpenInput(true)} ><Text style={{fontSize: 30}} >+</Text></Pressable>}
     </View>
   )
 }

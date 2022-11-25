@@ -1,3 +1,5 @@
 export const paths = {
-  todoCategories: '/TodoCategories'
+  todoCategories: '/TodoCategories',
+  todoPriorities: '/TodoPriorities',
+  todoTasks: '/TodoTasks',
 }
