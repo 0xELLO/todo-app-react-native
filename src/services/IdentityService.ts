@@ -1,6 +1,6 @@
 import {AxiosError} from 'axios';
 import {IJwtResponse} from '../domain/IJwtResponse';
-import {CredentialType, UserCredentials} from '../hooks/UserCredentials';
+import {CredentialType, UserCredentials} from '../util/UserCredentials';
 import httpClient from './HttpClient';
 
 export class IdentityService {

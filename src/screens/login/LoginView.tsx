@@ -14,7 +14,7 @@ const LoginView = () => {
   const [password, setPassword] = useState('Password.123');
 
   const login = async () => {
-    console.log('Here')
+    console.log('Here');
     const res = await is.login(email, password);
 
     if (res === false) {
@@ -26,18 +26,18 @@ const LoginView = () => {
 
   return (
     <View style={[styles.viewMain, mainStyles.container]}>
-      <Text style={[mainStyles.titleBlock, styles.label]}>Register</Text>
       <View style={styles.viewRow}>
           <Text style={mainStyles.textBlock}>Email</Text>
-          <TextInput style={[styles.input, mainStyles.inputBlock]} value={email} keyboardType={"email-address"} autoComplete={"email"} onChangeText={text => setEmail(text)}  placeholder="Email" />
+          <TextInput style={[styles.input, mainStyles.inputBlock]} value={email} keyboardType={'email-address'} autoComplete={'email'} placeholder="Email"
+           onChangeText={text => setEmail(text)} />
       </View>
       <View style={styles.viewRow}>
           <Text style={mainStyles.textBlock}>Password</Text>
-          <TextInput style={[styles.input, mainStyles.inputBlock]} value={password} onChangeText={text => setPassword(text)}  secureTextEntry={true} placeholder="Password" />
+          <TextInput style={[styles.input, mainStyles.inputBlock]} value={password} secureTextEntry={true} placeholder="Password"
+           onChangeText={text => setPassword(text)} />
       </View>
-      <Pressable onPress={() => {login()}} style={[mainStyles.button]}><Text style={[mainStyles.titleBlock]}>Login</Text></Pressable>
+      <Pressable onPress={() => {login();}} style={[mainStyles.button]}><Text style={[mainStyles.titleBlock]}>Login</Text></Pressable>
     </View>
-
   );
 };
 
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   label: {
-    marginBottom: 10
+    marginBottom: 10,
   },
   input: {
     width: '66%',

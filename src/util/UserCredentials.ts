@@ -9,11 +9,18 @@ export enum CredentialType {
 
 export class UserCredentials {
   async get(key: CredentialType) {
-    return getSavedValue(key);
+    return await getSavedValue(key);
   }
 
   async set(key: CredentialType, value: string) {
-    return setValue(key, value);
+    return await setValue(key, value);
+  }
+
+  async deleteAll() {
+    await AsyncStorage.removeItem(CredentialType.FirstName);
+    await AsyncStorage.removeItem(CredentialType.LastName);
+    await AsyncStorage.removeItem(CredentialType.RefreshToken);
+    await AsyncStorage.removeItem(CredentialType.Token);
   }
 }
 

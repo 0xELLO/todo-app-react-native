@@ -1,5 +1,5 @@
 import {AxiosError} from 'axios';
-import { CredentialType, UserCredentials } from '../hooks/UserCredentials';
+import { CredentialType, UserCredentials } from '../util/UserCredentials';
 import httpClient from './HttpClient';
 import { IdentityService } from './IdentityService';
 

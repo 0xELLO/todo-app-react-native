@@ -4,7 +4,6 @@ import { useStyles } from '../../styles/mainStyles';
 import { IdentityService } from '../../services/IdentityService';
 import { AuthStateUpdateContext } from '../../../App';
 
-
 const RegisterView = () => {
   const mainStyles = useStyles();
   const is = new IdentityService();
@@ -27,10 +26,9 @@ const RegisterView = () => {
 
   return (
     <View style={[styles.viewMain, mainStyles.container]}>
-      <Text style={[mainStyles.titleBlock, styles.label]}>Register</Text>
       <View style={styles.viewRow}>
           <Text style={mainStyles.textBlock}>Email</Text>
-          <TextInput style={[styles.input, mainStyles.inputBlock]} value={email} keyboardType={"email-address"} autoComplete={"email"} onChangeText={text => setEmail(text)}  placeholder="Email" />
+          <TextInput style={[styles.input, mainStyles.inputBlock]} value={email} keyboardType={'email-address'} autoComplete={'email'} onChangeText={text => setEmail(text)}  placeholder="Email" />
       </View>
       <View style={styles.viewRow}>
           <Text style={mainStyles.textBlock}>First name</Text>
@@ -44,9 +42,8 @@ const RegisterView = () => {
           <Text style={mainStyles.textBlock}>Password</Text>
           <TextInput style={[styles.input, mainStyles.inputBlock]} value={password} onChangeText={text => setPassword(text)}  secureTextEntry={true} placeholder="Password" />
       </View>
-      <Pressable onPress={() => {register()}} style={[mainStyles.button]}><Text style={[mainStyles.titleBlock]}>Register</Text></Pressable>
+      <Pressable onPress={() => {register();}} style={[mainStyles.button]}><Text style={[mainStyles.titleBlock]}>Register</Text></Pressable>
     </View>
-
   );
 };
 
@@ -69,7 +66,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   label: {
-    marginBottom: 10
+    marginBottom: 10,
   },
   input: {
     width: '66%',
